@@ -11,7 +11,7 @@ kubebuilder init --domain zyc.io
 
 ## make命令
 `make manifests`: 修改完`api/v1/cronjob_types.go`之后，使用此命令可以重新生成新的CRD资源文件，生成的CRD资源文件位于`config/crd/bases`目录之下  
-`make install`: 将生成的CRD文件apply至K8s集群中。本项目在k8s集群版本为1.23.5中有报错,以下列出报错的解决思路
+`make install`: 将生成的CRD文件apply至K8s集群中。本项目在k8s集群版本为1.23.5中有报错,以下列出报错的解决思路  
 `make run`: 在本地启动controller。本地运行的go版本为go1.22.3
 
 ### make install 报错解决思路
