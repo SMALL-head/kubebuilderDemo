@@ -1,100 +1,26 @@
 # kubebuilderproject
-// TODO(user): Add simple overview of use/purpose
+学习kubebuilder入门级别项目，kubebuilder版本为4.0.0
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
-
-## Getting Started
-
-### Prerequisites
-- go version v1.22.0+
-- docker version 17.03+.
-- kubectl version v1.11.3+.
-- Access to a Kubernetes v1.11.3+ cluster.
-
-### To Deploy on the cluster
-**Build and push your image to the location specified by `IMG`:**
-
-```sh
-make docker-build docker-push IMG=<some-registry>/kubebuilderproject:tag
+## 这个项目是如何初始化的？
+使用下面的命令初始化项目
+```bash
+kubebuilder init --domain zyc.io
 ```
+初始化之后需要在`api/v1/groupversion_info.go`文件中修改GroupVersion
 
-**NOTE:** This image ought to be published in the personal registry you specified.
-And it is required to have access to pull the image from the working environment.
-Make sure you have the proper permission to the registry if the above commands don’t work.
 
-**Install the CRDs into the cluster:**
+## make命令
+`make manifests`: 修改完`api/v1/cronjob_types.go`之后，使用此命令可以重新生成新的CRD资源文件，生成的CRD资源文件位于`config/crd/bases`目录之下  
+`make install`: 将生成的CRD文件apply至K8s集群中。本项目在k8s集群版本为1.23.5中有报错,以下列出报错的解决思路
+`make run`: 在本地启动controller。本地运行的go版本为go1.22.3
 
-```sh
-make install
-```
+### make install 报错解决思路
+1. metadata.annotation: too long...
+解决方法：不使用make install命令了，直接用`kubectl apply --server-side=true -f config/crd/bases/batch.zyc.io_cronjobs.yaml`,即增加命令选项`--server-side=true`
+2. unable to install CRDs onto control plane: unable to create CRD instances: unable to create CRD "cronjobs.batch.tutorial.kubebuilder.io": CustomResourceDefinition.apiextensions.k8s.io "cronjobs.batch.tutorial.kubebuilder.io" is invalid: [spec.validation.openAPIV3Schema.properties[spec].properties[jobTemplate].properties[spec].properties[template].properties[spec].properties[imagePullSecrets].items.properties[name].default: Required value: this property is in x-kubernetes-list-map-keys, so it must have a default or be a required property, spec.validation.openAPIV3Schema.properties[spec].properties[jobTemplate].properties[spec].properties[template].properties[spec].properties[hostAliases].items.properties[ip].default: Required value: this property is in x-kubernetes-list-map-keys, so it must have a default or be a required property]
+解决思路：手动在资源中添加default value。我在提交版本中已经修改了。但是如果使用`make manifests`后，这个修改会被消除，此时需要重新修改
 
-**Deploy the Manager to the cluster with the image specified by `IMG`:**
 
-```sh
-make deploy IMG=<some-registry>/kubebuilderproject:tag
-```
-
-> **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-privileges or be logged in as admin.
-
-**Create instances of your solution**
-You can apply the samples (examples) from the config/sample:
-
-```sh
-kubectl apply -k config/samples/
-```
-
->**NOTE**: Ensure that the samples has default values to test it out.
-
-### To Uninstall
-**Delete the instances (CRs) from the cluster:**
-
-```sh
-kubectl delete -k config/samples/
-```
-
-**Delete the APIs(CRDs) from the cluster:**
-
-```sh
-make uninstall
-```
-
-**UnDeploy the controller from the cluster:**
-
-```sh
-make undeploy
-```
-
-## Project Distribution
-
-Following are the steps to build the installer and distribute this project to users.
-
-1. Build the installer for the image built and published in the registry:
-
-```sh
-make build-installer IMG=<some-registry>/kubebuilderproject:tag
-```
-
-NOTE: The makefile target mentioned above generates an 'install.yaml'
-file in the dist directory. This file contains all the resources built
-with Kustomize, which are necessary to install this project without
-its dependencies.
-
-2. Using the installer
-
-Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project, i.e.:
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/<org>/kubebuilderproject/<tag or branch>/dist/install.yaml
-```
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-**NOTE:** Run `make help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
 
